@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Sadow Crew" />
+<meta name="theme-color" content="#0c0c0e" />
+<title>Sadow Crew Field Log</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;600;700&family=Saira:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&family=Yellowtail&display=swap');
+html,body{margin:0;padding:0;background:#0c0c0e;}
+.sf-root{
+  --bg:#0c0c0e; --bg2:#141418; --card:#1a1a1f; --card2:#202027;
+  --line:#2c2c34; --line2:#3a3a44;
+  --txt:#ececec; --mut:#8c8c96; --mut2:#6b6b74;
+  --gold:#ffb627; --gold2:#ff8a00; --orange:#ff7a00; --red:#c0392b;
+  --steel:#b9bcc4;
+  font-family:'Saira',system-ui,sans-serif;color:var(--txt);
+  background:radial-gradient(1100px 500px at 80% -10%, rgba(255,138,0,.08), transparent 60%),radial-gradient(900px 500px at -10% 110%, rgba(255,182,39,.05), transparent 60%),var(--bg);
+  min-height:100vh;width:100%;-webkit-font-smoothing:antialiased;
+}
+.fig{font-family:'IBM Plex Mono',monospace;font-feature-settings:"tnum";}
+.sf-header{display:flex;align-items:center;gap:16px;padding:18px 18px 14px;border-bottom:2px solid var(--red);background:linear-gradient(180deg,#000 0%, #0c0c0e 100%);}
+.sf-logo{height:60px;width:auto;display:block;filter:drop-shadow(0 2px 6px rgba(0,0,0,.6));}
+.sf-headmeta{flex:1;min-width:0;}
+.sf-headtitle{font-family:'Saira Condensed';font-weight:700;letter-spacing:.08em;font-size:15px;color:var(--steel);}
+.sf-projrow{display:flex;gap:6px;margin-top:4px;max-width:360px;}
+.sf-proj{flex:1;min-width:0;background:var(--card);color:var(--txt);border:1px solid var(--line2);border-radius:8px;padding:7px 10px;font-family:'Saira';font-size:14px;}
+.sf-projmanage{background:var(--card);color:var(--gold);border:1px solid var(--gold2);border-radius:8px;padding:0 14px;font-family:'Saira Condensed';font-weight:600;letter-spacing:.04em;font-size:13px;cursor:pointer;white-space:nowrap;}
+.sf-projmanage:hover{background:rgba(255,138,0,.12);}
+.sf-jobmgr{background:#0a0a0c;border-bottom:1px solid var(--line2);padding:14px 18px;}
+.sf-jobmgr h4{margin:0 0 10px;font-family:'Saira Condensed';font-weight:700;letter-spacing:.06em;color:var(--steel);font-size:13px;text-transform:uppercase;}
+.sf-jobadd{display:flex;gap:8px;margin-bottom:12px;}
+.sf-jobadd input{flex:1;}
+.sf-jobrow{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
+.sf-jobrow input{flex:1;}
+.sf-jobdel{background:none;border:1px solid var(--line2);color:var(--mut);border-radius:8px;width:42px;min-height:40px;font-size:16px;cursor:pointer;}
+.sf-jobdel:hover:not(:disabled){color:var(--red);border-color:var(--red);}
+.sf-jobdel:disabled{opacity:.35;cursor:not-allowed;}
+.sf-jobdone{background:transparent;border:1px solid var(--gold2);color:var(--gold);border-radius:8px;padding:9px 18px;font-family:'Saira Condensed';font-weight:600;letter-spacing:.04em;cursor:pointer;width:auto;margin-top:4px;}
+.sf-jobdone:hover{background:rgba(255,138,0,.12);}
+.sf-tabs{display:flex;gap:5px;padding:12px 10px 0;background:var(--bg);position:sticky;top:0;z-index:5;}
+.sf-tab{flex:1;background:var(--card);color:var(--mut);border:1px solid var(--line);border-bottom:none;border-radius:10px 10px 0 0;padding:11px 4px;font-family:'Saira Condensed';font-weight:600;letter-spacing:.03em;font-size:13.5px;cursor:pointer;position:relative;transition:.15s;}
+.sf-tab:hover{color:var(--txt);}
+.sf-tab.on{color:#111;background:linear-gradient(180deg,var(--gold),var(--gold2));border-color:var(--gold2);}
+.sf-badge{position:absolute;top:3px;right:6px;background:var(--red);color:#fff;font-size:10px;font-family:'IBM Plex Mono';padding:1px 5px;border-radius:8px;}
+.sf-tab.on .sf-badge{background:#111;color:var(--gold);}
+.sf-main{padding:16px 12px 90px;max-width:680px;margin:0 auto;}
+.sf-stack{display:flex;flex-direction:column;gap:14px;}
+.sf-card{background:linear-gradient(180deg,var(--card),var(--bg2));border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 1px 0 rgba(255,255,255,.02) inset, 0 6px 18px rgba(0,0,0,.35);}
+.sf-cardhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.sf-cardhead h3{margin:0;font-family:'Saira Condensed';font-weight:700;letter-spacing:.06em;font-size:15px;color:var(--steel);text-transform:uppercase;}
+.sf-field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
+.sf-field:last-child{margin-bottom:0;}
+.sf-field>span{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);font-weight:600;}
+.sf-row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.sf-loads{max-width:220px;}
+input,select,textarea{background:var(--bg);color:var(--txt);border:1px solid var(--line2);border-radius:9px;padding:11px 12px;font-family:'Saira';font-size:15px;width:100%;outline:none;transition:.15s;}
+input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 0 2px rgba(255,182,39,.18);}
+textarea{resize:vertical;line-height:1.45;}
+input[type=date]{color-scheme:dark;}
+.sf-add{background:transparent;color:var(--gold);border:1px solid var(--gold2);border-radius:8px;padding:8px 14px;font-family:'Saira Condensed';font-weight:600;letter-spacing:.04em;cursor:pointer;font-size:14px;width:auto;white-space:nowrap;}
+.sf-add:hover{background:rgba(255,138,0,.12);}
+.sf-empty{color:var(--mut2);font-size:14px;text-align:center;padding:10px 0;}
+.sf-line{border-top:1px solid var(--line);padding:12px 0;}
+.sf-line:first-of-type{border-top:none;}
+.sf-line-rate{margin-bottom:8px;}
+.sf-line-row{display:flex;align-items:center;gap:8px;}
+.sf-line-person{flex:1.4;min-width:0;}
+.sf-qty{position:relative;flex:1;display:flex;align-items:center;}
+.sf-qty input{padding-right:38px;text-align:right;font-family:'IBM Plex Mono';}
+.sf-unit{position:absolute;right:11px;color:var(--mut);font-size:12px;font-family:'Saira Condensed';font-weight:600;}
+.sf-del{background:none;border:none;color:var(--mut2);font-size:18px;line-height:1;cursor:pointer;width:auto;padding:0 6px;}
+.sf-del:hover{color:var(--red);}
+.sf-save{margin-top:14px;width:100%;background:linear-gradient(180deg,var(--gold),var(--gold2));color:#161616;border:none;border-radius:10px;padding:14px;font-family:'Saira Condensed';font-weight:700;letter-spacing:.06em;font-size:16px;text-transform:uppercase;cursor:pointer;box-shadow:0 6px 16px rgba(255,138,0,.25);}
+.sf-save:hover{filter:brightness(1.06);}
+.sf-cancel{margin-top:8px;width:100%;background:transparent;border:1px solid var(--line2);color:var(--mut);border-radius:10px;padding:11px;font-family:'Saira Condensed';font-weight:600;letter-spacing:.04em;cursor:pointer;}
+.sf-recap{display:flex;gap:18px;flex-wrap:wrap;color:var(--mut);font-size:13px;}
+.sf-recap b{color:var(--steel);font-family:'IBM Plex Mono';}
+.sf-logitem{padding:14px 16px;}
+.sf-logtop{display:flex;justify-content:space-between;align-items:flex-start;}
+.sf-logdate{font-size:18px;font-weight:600;color:var(--steel);}
+.sf-logcat{font-size:12px;color:var(--gold);letter-spacing:.04em;text-transform:uppercase;font-weight:600;margin-top:2px;}
+.sf-logjob{font-size:11px;color:var(--mut2);margin-top:2px;}
+.sf-logwork{font-size:13.5px;color:var(--mut);line-height:1.5;margin:10px 0 0;}
+.sf-logchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:11px;}
+.sf-chip{background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:11.5px;color:var(--steel);font-family:'IBM Plex Mono';}
+.sf-chip.loads{border-color:var(--orange);color:var(--orange);}
+.sf-logactions{display:flex;gap:8px;margin-top:13px;}
+.sf-logactions button{background:transparent;border:1px solid var(--line2);color:var(--mut);border-radius:8px;padding:7px 16px;font-family:'Saira Condensed';font-weight:600;letter-spacing:.04em;cursor:pointer;width:auto;}
+.sf-logactions button:hover{color:var(--txt);}
+.sf-logactions .danger:hover{color:var(--red);border-color:var(--red);}
+.sf-hint{color:var(--mut);font-size:13.5px;line-height:1.5;}
+.sf-exportbtns{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;}
+.sf-exportbtns .sf-save{width:auto;margin:0;flex:1;min-width:150px;}
+.sf-exportbtns .sf-add{flex:1;min-width:100px;text-align:center;}
+.sf-itemrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line);}
+.sf-itemrow:first-of-type{border-top:none;}
+.sf-itemname{font-size:13.5px;color:var(--steel);}
+.sf-itemunit{font-size:11px;color:var(--mut2);font-family:'Saira Condensed';margin-left:4px;}
+.sf-toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#111;border:1px solid var(--gold2);color:var(--gold);padding:11px 20px;border-radius:10px;font-family:'Saira Condensed';font-weight:600;letter-spacing:.04em;z-index:50;box-shadow:0 8px 24px rgba(0,0,0,.5);}
+@media (max-width:520px){.sf-row2{grid-template-columns:1fr;}.sf-line-row{flex-wrap:wrap;}.sf-line-person{flex:1 1 100%;}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useMemo, useRef } = React;
+const PFX = "sadowcrew:";
+function lsLoad(key, fallback){ try{ const v=window.localStorage.getItem(PFX+key); return v?JSON.parse(v):fallback; }catch(e){ return fallback; } }
+function lsSave(key, value){ try{ window.localStorage.setItem(PFX+key, JSON.stringify(value)); }catch(e){} }
+
+function Logo({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 560 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sadow Excavation and Grading">
+      <defs><linearGradient id="sadowGold" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stopColor="#f47a1f" /><stop offset="0.55" stopColor="#ff9e1b" /><stop offset="1" stopColor="#ffce4d" />
+      </linearGradient></defs>
+      <text x="280" y="122" textAnchor="middle" fontFamily="'Saira Condensed', sans-serif" fontWeight="700" fontStyle="italic" fontSize="150" letterSpacing="2" fill="#b9bcc4" stroke="#ffb627" strokeWidth="5" paintOrder="stroke" strokeLinejoin="round">SADOW</text>
+      <text x="280" y="232" textAnchor="middle" fontFamily="'Yellowtail', cursive" fontSize="96" fill="url(#sadowGold)">Excavation</text>
+      <text x="280" y="292" textAnchor="middle" fontFamily="'Yellowtail', cursive" fontSize="52" fill="#ff7a00">&amp;</text>
+      <text x="280" y="374" textAnchor="middle" fontFamily="'Yellowtail', cursive" fontSize="84" fill="url(#sadowGold)">Grading</text>
+    </svg>
+  );
+}
+
+// Equipment/labor catalog. IDs match the office app so imports price automatically. NO prices shown to crew.
+const DEFAULT_CATALOG = [
+  { id: "l1", group: "Labor & Crew", name: "Project Superintendent / Owner Supervision", unit: "HR", kind: "labor" },
+  { id: "l2", group: "Labor & Crew", name: "Head Foreman", unit: "HR", kind: "labor" },
+  { id: "l3", group: "Labor & Crew", name: "Foreman / Operator", unit: "HR", kind: "labor" },
+  { id: "l4", group: "Labor & Crew", name: "Operator / Laborer", unit: "HR", kind: "labor" },
+  { id: "l5", group: "Labor & Crew", name: "Laborer", unit: "HR", kind: "labor" },
+  { id: "g1", group: "Laser / Grade Control", name: "Laser Setup / Grade Control / Benchmark", unit: "HR", kind: "grade" },
+  { id: "g2", group: "Laser / Grade Control", name: "Laser / Receiver / Tripod / Grade Tools", unit: "DAY", kind: "grade" },
+  { id: "g3", group: "Laser / Grade Control", name: "Half-Day Laser / Stake / Grade Setup", unit: "EA", kind: "grade" },
+  { id: "g4", group: "Laser / Grade Control", name: "Full-Day Layout / Staking / Grade Checking", unit: "DAY", kind: "grade" },
+  { id: "e1", group: "Equipment - Mini & Skid", name: "Mini Excavator - Equipment Only", unit: "HR", kind: "equipment" },
+  { id: "e2", group: "Equipment - Mini & Skid", name: "Mini Excavator w/ Operator", unit: "HR", kind: "equipment" },
+  { id: "e3", group: "Equipment - Mini & Skid", name: "Track Skid Steer - Equipment Only", unit: "HR", kind: "equipment" },
+  { id: "e4", group: "Equipment - Mini & Skid", name: "Track Skid Steer w/ Operator", unit: "HR", kind: "equipment" },
+  { id: "e5", group: "Equipment - Mini & Skid", name: "Track Skid Steer w/ Laser / Grading", unit: "HR", kind: "equipment" },
+  { id: "h1", group: "Equipment - Heavy", name: "320 Excavator - Equipment Only", unit: "HR", kind: "equipment" },
+  { id: "h2", group: "Equipment - Heavy", name: "320 Excavator w/ Operator", unit: "HR", kind: "equipment" },
+  { id: "h3", group: "Equipment - Heavy", name: "D5 Dozer - Equip Only / No GPS", unit: "HR", kind: "equipment" },
+  { id: "h4", group: "Equipment - Heavy", name: "D5 Dozer w/ Operator / No GPS", unit: "HR", kind: "equipment" },
+  { id: "h5", group: "Equipment - Heavy", name: "D5 Dozer w/ Trimble GPS & Operator", unit: "HR", kind: "equipment" },
+  { id: "h6", group: "Equipment - Heavy", name: "Vibratory Roller - Equipment Only", unit: "HR", kind: "equipment" },
+  { id: "h7", group: "Equipment - Heavy", name: "Vibratory Roller w/ Operator", unit: "HR", kind: "equipment" },
+  { id: "s1", group: "Small Equipment / Pumps", name: "Plate Compactor", unit: "DAY", kind: "small" },
+  { id: "s2", group: "Small Equipment / Pumps", name: "3 Inch Water Pump", unit: "DAY", kind: "small" },
+  { id: "s3", group: "Small Equipment / Pumps", name: "Generator", unit: "DAY", kind: "small" },
+];
+const DEFAULT_CREW = ["Nick", "Hunter", "Sebastian", "Ricardo", "Pat"];
+const CATEGORIES = ["Initial cut / rough grade","Swale / ROW repair","320 loading / onsite hauling","Utility / trench / backfill","Laser / string-line setup","Post-rain / trade regrade","Other"];
+
+const uid = () => Math.random().toString(36).slice(2, 10);
+const todayISO = () => new Date().toISOString().slice(0, 10);
+const prettyDate = (iso) => { if(!iso) return ""; const [y,m,d]=iso.split("-"); return parseInt(m)+"/"+parseInt(d)+"/"+y.slice(2); };
+
+function App(){
+  const [view, setView] = useState("entry");
+  const [catalog, setCatalog] = useState(()=>lsLoad("catalog", DEFAULT_CATALOG));
+  const [crew, setCrew] = useState(()=>lsLoad("crewlist", DEFAULT_CREW));
+  const [entries, setEntries] = useState(()=>lsLoad("entries", []));
+  const [projects, setProjects] = useState(()=>lsLoad("projects", [{id:"p1",name:"Residential Lots / ROW Swales"}]));
+  const [activeProject, setActiveProject] = useState(()=>lsLoad("activeProject","p1"));
+  const [toast, setToast] = useState("");
+  const [newJob, setNewJob] = useState("");
+  const [jobMgr, setJobMgr] = useState(false);
+  const [newCrew, setNewCrew] = useState("");
+  const [newItem, setNewItem] = useState({ name:"", group:"", unit:"HR", kind:"equipment" });
+
+  const blankDraft = () => ({ id:null, date:todayISO(), category:CATEGORIES[0], workPerformed:"", loadCount:"", lines:[] });
+  const [draft, setDraft] = useState(blankDraft());
+
+  useEffect(()=>lsSave("catalog", catalog), [catalog]);
+  useEffect(()=>lsSave("crewlist", crew), [crew]);
+  useEffect(()=>lsSave("entries", entries), [entries]);
+  useEffect(()=>lsSave("projects", projects), [projects]);
+  useEffect(()=>lsSave("activeProject", activeProject), [activeProject]);
+
+  const flash = (m)=>{ setToast(m); setTimeout(()=>setToast(""),1900); };
+  const findItem = (id)=>catalog.find((x)=>x.id===id);
+  const grouped = useMemo(()=>{ const o={}; catalog.forEach((r)=>{ (o[r.group]=o[r.group]||[]).push(r); }); return o; }, [catalog]);
+  const activeProjObj = projects.find((p)=>p.id===activeProject) || projects[0];
+  const projEntries = useMemo(()=>entries.filter((e)=>e.projectId===activeProject).sort((a,b)=>(a.date<b.date?1:-1)), [entries, activeProject]);
+
+  const setD = (patch)=>setDraft((d)=>({...d, ...patch}));
+  const addLine = ()=>setD({ lines:[...draft.lines, { id:uid(), rateId:(catalog[0]||{}).id, qty:"", person:"" }] });
+  const updLine = (id, patch)=>setD({ lines:draft.lines.map((l)=>(l.id===id?{...l,...patch}:l)) });
+  const delLine = (id)=>setD({ lines:draft.lines.filter((l)=>l.id!==id) });
+
+  const recap = (()=>{ let lh=0,eh=0; (draft.lines||[]).forEach((ln)=>{ const r=findItem(ln.rateId); if(!r) return; const q=Number(ln.qty)||0; if(r.unit==="HR"){ if(r.kind==="labor"||r.kind==="grade") lh+=q; else eh+=q; } }); return { lh, eh, loads:Number(draft.loadCount)||0 }; })();
+
+  const saveEntry = ()=>{
+    if(!draft.lines.length && !draft.loadCount && !draft.workPerformed){ flash("Add work, loads, or a line first"); return; }
+    if(draft.id){ setEntries((es)=>es.map((e)=>(e.id===draft.id?{...draft, projectId:activeProject}:e))); flash("Entry updated"); }
+    else { setEntries((es)=>[...es, {...draft, id:uid(), projectId:activeProject}]); flash("Entry logged"); }
+    setDraft(blankDraft()); setView("log");
+  };
+  const editEntry = (e)=>{ setDraft({...e}); setView("entry"); };
+  const deleteEntry = (id)=>{ setEntries((es)=>es.filter((e)=>e.id!==id)); flash("Entry deleted"); };
+
+  const addProject = ()=>{ const name=(newJob||"").trim(); if(!name){ flash("Enter a job name"); return; } const id=uid(); setProjects((ps)=>[...ps,{id,name}]); setActiveProject(id); setNewJob(""); flash("Job added"); };
+  const renameProject = (id,name)=>setProjects((ps)=>ps.map((p)=>(p.id===id?{...p,name}:p)));
+  const deleteProject = (id)=>{ if(projects.length<=1){ flash("Keep at least one job"); return; } const rem=projects.filter((p)=>p.id!==id); setProjects(rem); setEntries((es)=>es.filter((e)=>e.projectId!==id)); if(activeProject===id) setActiveProject(rem[0].id); flash("Job deleted"); };
+
+  // ---- crew management ----
+  const addCrew = ()=>{ const n=(newCrew||"").trim(); if(!n){ flash("Enter a name"); return; } if(crew.includes(n)){ flash("Already added"); return; } setCrew((cs)=>[...cs,n]); setNewCrew(""); flash("Crew added"); };
+  const renameCrew = (i,val)=>setCrew((cs)=>cs.map((c,idx)=>(idx===i?val:c)));
+  const deleteCrew = (i)=>{ if(crew.length<=1){ flash("Keep at least one"); return; } setCrew((cs)=>cs.filter((_,idx)=>idx!==i)); flash("Crew removed"); };
+
+  // ---- equipment/labor management ----
+  const addItem = ()=>{ const name=(newItem.name||"").trim(); if(!name){ flash("Enter a name"); return; } const group=(newItem.group||"").trim()||"Custom"; setCatalog((cs)=>[...cs,{ id:"c"+uid(), name, group, unit:newItem.unit, kind:newItem.kind, custom:true }]); setNewItem({ name:"", group:"", unit:"HR", kind:"equipment" }); flash("Item added"); };
+  const deleteItem = (id)=>{ setCatalog((cs)=>cs.filter((x)=>x.id!==id)); flash("Item removed"); };
+
+  // ---- send to office ----
+  const fileRef = useRef(null);
+  const exportForOffice = ()=>{
+    try{
+      const payload = { app:"sadow-field-log", source:"crew", version:1, exportedAt:new Date().toISOString(), crew, catalog, categories:CATEGORIES, entries, projects, activeProject };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type:"application/json" });
+      const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="sadow_crew_"+todayISO()+".json";
+      document.body.appendChild(a); a.click(); document.body.removeChild(a); flash("Work log exported - send to office");
+    }catch(e){ flash("Export failed"); }
+  };
+  const importData = (file)=>{
+    if(!file) return;
+    if(!window.confirm("Replace ALL current data with this file?")) return;
+    const reader=new FileReader();
+    reader.onload=()=>{ try{ const d=JSON.parse(reader.result); if(!d||typeof d!=="object") throw 0;
+      if(Array.isArray(d.catalog)&&d.catalog.length) setCatalog(d.catalog);
+      if(Array.isArray(d.crew)&&d.crew.length) setCrew(d.crew);
+      if(Array.isArray(d.entries)) setEntries(d.entries);
+      if(Array.isArray(d.projects)&&d.projects.length) setProjects(d.projects);
+      if(d.activeProject) setActiveProject(d.activeProject);
+      flash("Data imported"); setView("log");
+    }catch(e){ flash("Import failed - not a valid file"); } };
+    reader.readAsText(file);
+  };
+  const workCSV = ()=>{
+    const rows=[["Date","Job","Category","Loads","Detail","Work Performed"]];
+    projEntries.slice().sort((a,b)=>(a.date<b.date?-1:1)).forEach((e)=>{
+      const job=(projects.find((p)=>p.id===e.projectId)||{}).name||"";
+      const detail=(e.lines||[]).map((ln)=>{ const r=findItem(ln.rateId); if(!r) return ""; const who=ln.person?ln.person+" ":""; return who+r.name+" "+(Number(ln.qty)||0)+" "+r.unit; }).filter(Boolean).join("; ");
+      rows.push([prettyDate(e.date), job, e.category, Number(e.loadCount)||0, detail, (e.workPerformed||"").replace(/\n/g," ").replace(/"/g,"'")]);
+    });
+    return rows.map((r)=>r.map((c)=>'"'+c+'"').join(",")).join("\n");
+  };
+  const downloadCSV = ()=>{ try{ const blob=new Blob([workCSV()],{type:"text/csv"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="sadow_crew_log.csv"; document.body.appendChild(a); a.click(); document.body.removeChild(a); flash("CSV downloaded"); }catch(e){ flash("Download blocked"); } };
+
+  return (
+    <div className="sf-root">
+      <header className="sf-header">
+        <Logo className="sf-logo" />
+        <div className="sf-headmeta">
+          <div className="sf-headtitle">CREW DAILY FIELD LOG</div>
+          <div className="sf-projrow">
+            <select className="sf-proj" value={activeProject} onChange={(e)=>setActiveProject(e.target.value)}>
+              {projects.map((p)=><option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
+            <button className="sf-projmanage" onClick={()=>setJobMgr((v)=>!v)}>{jobMgr?"Close":"Jobs"}</button>
+          </div>
+        </div>
+      </header>
+
+      {jobMgr && (
+        <div className="sf-jobmgr">
+          <h4>Jobs</h4>
+          <div className="sf-jobadd">
+            <input placeholder="New job name" value={newJob} onChange={(e)=>setNewJob(e.target.value)} onKeyDown={(e)=>{ if(e.key==="Enter") addProject(); }} />
+            <button className="sf-add" onClick={addProject}>Add</button>
+          </div>
+          {projects.map((p)=>(
+            <div className="sf-jobrow" key={p.id}>
+              <input value={p.name} onChange={(e)=>renameProject(p.id, e.target.value)} />
+              <button className="sf-jobdel" onClick={()=>deleteProject(p.id)} disabled={projects.length<=1} aria-label="delete job">x</button>
+            </div>
+          ))}
+          <button className="sf-jobdone" onClick={()=>setJobMgr(false)}>Done</button>
+        </div>
+      )}
+
+      <nav className="sf-tabs">
+        {[["entry","New Entry"],["log","Daily Log"],["setup","Setup"],["send","Export"]].map(([k,label])=>(
+          <button key={k} className={"sf-tab"+(view===k?" on":"")} onClick={()=>setView(k)}>
+            {label}{k==="log" && projEntries.length?<span className="sf-badge">{projEntries.length}</span>:null}
+          </button>
+        ))}
+      </nav>
+
+      <main className="sf-main">
+        {view==="entry" && (
+          <div className="sf-stack">
+            <div className="sf-card">
+              <div className="sf-row2">
+                <label className="sf-field"><span>Date</span>
+                  <input type="date" value={draft.date} onChange={(e)=>setD({date:e.target.value})} /></label>
+                <label className="sf-field"><span>Category</span>
+                  <select value={draft.category} onChange={(e)=>setD({category:e.target.value})}>
+                    {CATEGORIES.map((c)=><option key={c}>{c}</option>)}
+                  </select></label>
+              </div>
+              <label className="sf-field"><span>Work Performed</span>
+                <textarea rows={3} placeholder="What did the crew do today?" value={draft.workPerformed} onChange={(e)=>setD({workPerformed:e.target.value})} /></label>
+              <label className="sf-field sf-loads"><span>Stockpile / Haul Loads</span>
+                <input type="number" min="0" inputMode="numeric" placeholder="0" value={draft.loadCount} onChange={(e)=>setD({loadCount:e.target.value})} /></label>
+            </div>
+
+            <div className="sf-card">
+              <div className="sf-cardhead"><h3>Crew &amp; Equipment</h3><button className="sf-add" onClick={addLine}>+ Add Line</button></div>
+              {draft.lines.length===0 && <p className="sf-empty">Add who worked and what equipment ran, with hours.</p>}
+              {draft.lines.map((ln)=>{
+                const r=findItem(ln.rateId); const isLabor=r&&(r.kind==="labor"||r.kind==="grade");
+                return (
+                  <div key={ln.id} className="sf-line">
+                    <select className="sf-line-rate" value={ln.rateId} onChange={(e)=>updLine(ln.id,{rateId:e.target.value})}>
+                      {Object.keys(grouped).map((g)=>(
+                        <optgroup key={g} label={g}>{grouped[g].map((it)=><option key={it.id} value={it.id}>{it.name+" ("+it.unit+")"}</option>)}</optgroup>
+                      ))}
+                    </select>
+                    <div className="sf-line-row">
+                      {isLabor && (
+                        <select className="sf-line-person" value={ln.person||""} onChange={(e)=>updLine(ln.id,{person:e.target.value})}>
+                          <option value="">- crew -</option>{crew.map((c)=><option key={c}>{c}</option>)}
+                        </select>
+                      )}
+                      <div className="sf-qty"><input type="number" min="0" step="0.5" inputMode="decimal" placeholder="0" value={ln.qty} onChange={(e)=>updLine(ln.id,{qty:e.target.value})} /><span className="sf-unit">{r?r.unit:""}</span></div>
+                      <button className="sf-del" onClick={()=>delLine(ln.id)} aria-label="remove">x</button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="sf-card">
+              <div className="sf-recap">
+                <span>Crew hrs <b className="fig">{recap.lh}</b></span>
+                <span>Equip hrs <b className="fig">{recap.eh}</b></span>
+                <span>Loads <b className="fig">{recap.loads}</b></span>
+              </div>
+              <button className="sf-save" onClick={saveEntry}>{draft.id?"Update Entry":"Log This Day"}</button>
+              {draft.id && <button className="sf-cancel" onClick={()=>setDraft(blankDraft())}>Cancel Edit</button>}
+            </div>
+          </div>
+        )}
+
+        {view==="log" && (
+          <div className="sf-stack">
+            {projEntries.length===0 && <div className="sf-card sf-empty">No entries yet. Tap <b>New Entry</b> to start.</div>}
+            {projEntries.map((e)=>{
+              const job=(projects.find((p)=>p.id===e.projectId)||{}).name||"";
+              return (
+                <div key={e.id} className="sf-card sf-logitem">
+                  <div className="sf-logtop">
+                    <div>
+                      <div className="sf-logdate fig">{prettyDate(e.date)}</div>
+                      <div className="sf-logcat">{e.category}</div>
+                      <div className="sf-logjob">{job}</div>
+                    </div>
+                  </div>
+                  {e.workPerformed && <p className="sf-logwork">{e.workPerformed}</p>}
+                  <div className="sf-logchips">
+                    {(e.lines||[]).map((ln)=>{ const r=findItem(ln.rateId); if(!r) return null; const suffix=r.unit==="HR"?"h":(r.unit==="DAY"?"d":""); const who=ln.person?ln.person+" - ":""; return <span key={ln.id} className="sf-chip">{who+r.name+" - "+(Number(ln.qty)||0)+suffix}</span>; })}
+                    {Number(e.loadCount)>0 && <span className="sf-chip loads">{(Number(e.loadCount)||0)+" loads"}</span>}
+                  </div>
+                  <div className="sf-logactions"><button onClick={()=>editEntry(e)}>Edit</button><button className="danger" onClick={()=>deleteEntry(e.id)}>Delete</button></div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {view==="setup" && (
+          <div className="sf-stack">
+            <div className="sf-card sf-hint">Manage your crew names and the equipment / labor list. Anything you add shows up in New Entry. (The office sets all pricing.)</div>
+
+            <div className="sf-card">
+              <div className="sf-cardhead"><h3>Crew Members</h3></div>
+              <div className="sf-jobadd">
+                <input placeholder="New crew member name" value={newCrew} onChange={(e)=>setNewCrew(e.target.value)} onKeyDown={(e)=>{ if(e.key==="Enter") addCrew(); }} />
+                <button className="sf-add" onClick={addCrew}>Add</button>
+              </div>
+              {crew.map((c,i)=>(
+                <div className="sf-jobrow" key={i}>
+                  <input value={c} onChange={(e)=>renameCrew(i, e.target.value)} />
+                  <button className="sf-jobdel" onClick={()=>deleteCrew(i)} disabled={crew.length<=1} aria-label="remove">x</button>
+                </div>
+              ))}
+            </div>
+
+            <div className="sf-card">
+              <div className="sf-cardhead"><h3>Add Equipment / Labor</h3></div>
+              <label className="sf-field"><span>Description</span>
+                <input type="text" placeholder="e.g. Water Truck w/ Operator" value={newItem.name} onChange={(e)=>setNewItem({...newItem, name:e.target.value})} /></label>
+              <div className="sf-row2">
+                <label className="sf-field"><span>Group</span>
+                  <input type="text" list="cg-groups" placeholder="Custom" value={newItem.group} onChange={(e)=>setNewItem({...newItem, group:e.target.value})} />
+                  <datalist id="cg-groups">{Object.keys(grouped).map((g)=><option key={g} value={g} />)}</datalist></label>
+                <label className="sf-field"><span>Type</span>
+                  <select value={newItem.kind} onChange={(e)=>setNewItem({...newItem, kind:e.target.value})}>
+                    <option value="labor">Labor / Crew</option><option value="grade">Grade / Layout</option><option value="equipment">Equipment</option><option value="small">Small Equipment</option>
+                  </select></label>
+              </div>
+              <label className="sf-field"><span>Unit</span>
+                <select value={newItem.unit} onChange={(e)=>setNewItem({...newItem, unit:e.target.value})}>
+                  <option value="HR">HR</option><option value="DAY">DAY</option><option value="EA">EA</option><option value="LS">LS</option>
+                </select></label>
+              <button className="sf-save" onClick={addItem}>Add Item</button>
+            </div>
+
+            {Object.keys(grouped).map((g)=>(
+              <div className="sf-card" key={g}>
+                <div className="sf-cardhead"><h3>{g}</h3></div>
+                {grouped[g].map((it)=>(
+                  <div className="sf-itemrow" key={it.id}>
+                    <span className="sf-itemname">{it.name}<span className="sf-itemunit">({it.unit})</span></span>
+                    <button className="sf-del" onClick={()=>deleteItem(it.id)} aria-label="remove">x</button>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {view==="send" && (
+          <div className="sf-stack">
+            <div className="sf-card sf-exportcard">
+              <div className="sf-cardhead"><h3>Send Work Log to Office</h3></div>
+              <p className="sf-hint">Export your logged days as a file and send it to the office (text, email, or shared drive). The office app turns it into the priced T&amp;M backup. The CSV is a plain readable copy with no pricing.</p>
+              <div className="sf-exportbtns">
+                <button className="sf-save" onClick={exportForOffice}>Export Work Log</button>
+                <button className="sf-add" onClick={downloadCSV}>Download CSV</button>
+                <button className="sf-add" onClick={()=>fileRef.current && fileRef.current.click()}>Import</button>
+              </div>
+              <input ref={fileRef} type="file" accept="application/json,.json" style={{display:"none"}} onChange={(e)=>{ importData(e.target.files && e.target.files[0]); e.target.value=""; }} />
+            </div>
+          </div>
+        )}
+      </main>
+
+      {toast && <div className="sf-toast">{toast}</div>}
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
